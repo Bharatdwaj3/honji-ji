@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  //output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+//
+enum Genre {
+  FANTASY
+  SCIENCE
+}
+
+enum Subject {
+  Geography
+  Social_Studies
+  Computer_Science
+  Literature
+  History
+}
+
+model book {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  publisher String?
+  writer    String?
+  genre     Genre[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model faculty {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  Fname     String
+  Lname     String
+  age       Int
+  gender    String
+  Expertise Subject
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model student {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  Fname    String
+  Lname    String
+  age      Int
+  gender   String
+  Subjects Subject
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}

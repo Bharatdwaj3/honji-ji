@@ -9,26 +9,30 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-hot-toast": "^2.6.0",
-    "react-leaflet": "^5.0.0",
-    "react-redux": "^9.2.0",
-    "redux": "^5.0.1",
+    "@prisma/adapter-pg": "7.8.0",
+    "@prisma/client": "7.8.0",
     "@reduxjs/toolkit": "^2.11.2",
     "cookies-next": "^6.1.1",
+    "firebase": "^12.13.0",
     "framer-motion": "^12.33.0",
     "jsonwebtoken": "^9.0.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.563.0",
     "multer": "^2.1.1",
     "multer-storage-cloudinary": "^4.0.0",
+    "next": "16.2.6",
+    "pg": "^8.21.0",
+    "postgres": "3.4.8",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-hot-toast": "^2.6.0",
+    "react-leaflet": "^5.0.0",
+    "react-redux": "^9.2.0",
+    "redux": "^5.0.1",
     "sonner": "^2.0.7",
     "uuid": "^13.0.0",
     "winston": "^3.19.0",
     "zod": "^4.3.6"
-
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -41,6 +45,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
