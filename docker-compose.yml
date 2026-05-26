@@ -1,45 +1,54 @@
 name: honji-ji
 services:
-  honji:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - NODE_ENV=production
-    container_name: services_ctr
-    ports: 
-      - "5112:3000" 
-
-    networks:
-      - hon_no_network
-
-    env_file:
-      - .env.production
-    
+  
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_ctr
     restart: unless-stopped
-
+    
+    environment:
+      POSTGRES_PASSWORD: ${PgSql_Password}
+      POSTGRES_USER: ${PgSql_User}
+      POSTGRES_DB: ${PgSql_Database}
+    ports: 
+      - 5433:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - honji-network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s  
+  
+  app:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    container_name: honji-app
+    restart: unless-stopped
+    environment:
+        - NODE_ENV=production
+        - DATABASE_URL=postgresql://${PgSql_User}:${PgSql_Password}@db:5432/${PgSql_Database}?schema=public
+        #_Firebase-Emulators
+        - FIREBASE_AUTH_EMULATOR_HOST=host.docker.internal:9099
+        - FIREBASE_STORAGE_EMULATOR_HOST=host.docker.internal:9199
+    ports: 
+      - 3000:3000 #_NextJS
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - honji-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
-      timeout: 3s
+      timeout: 5s
       retries: 3
       start_period: 40s
 
-    logging:
-      driver: json-file
-      options:
-        max-size: "28m"
-        max-file: "5"
-        compress: "true"
-    
-    security_opt:
-      - no-new-privileges:true
-    mem_limit: 512m
-    cpus: "0.75"
-    tmpfs:
-      - /tmp:size=64m, noexec, nosuid
-  
-  
   redis: 
     image: redis:7-alpine
     container_name: honji-redis
@@ -129,6 +138,7 @@ networks:
     driver: bridge
 
 volumes:
+  postgres_data:
   redis_data:
   prometheus_data:
   loki_data:

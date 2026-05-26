@@ -17,14 +17,7 @@ datasource db {
 enum Genre {
   FANTASY
   SCIENCE
-}
-
-enum Subject {
-  Geography
-  Social_Studies
-  Computer_Science
-  Literature
-  History
+  ART
 }
 
 model book {
@@ -39,28 +32,28 @@ model book {
   deletedAt DateTime?
 }
 
-model faculty {
+model writer {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   Fname     String
   Lname     String
   age       Int
   gender    String
-  Expertise Subject
-
+  genre     Genre[]
+  
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 }
 
-model student {
+model reader {
   id       Int      @id @default(autoincrement())
   email    String   @unique
   Fname    String
   Lname    String
   age      Int
   gender   String
-  Subjects Subject
+  genre     Genre[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

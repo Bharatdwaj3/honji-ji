@@ -13,7 +13,7 @@ import {
   Fbase_client_x509_cert_url, 
   Fbase_universe_domain
 
-} from "./env.config.ts";
+}  from "@/config/env";
 
 
 
