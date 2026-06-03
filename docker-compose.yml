@@ -30,13 +30,14 @@ services:
     container_name: honji-app
     restart: unless-stopped
     environment:
+        - DB_HOST=db
+        - DB_PORT=5432
         - NODE_ENV=production
         - DATABASE_URL=postgresql://${PgSql_User}:${PgSql_Password}@db:5432/${PgSql_Database}?schema=public
-        #_Firebase-Emulators
         - FIREBASE_AUTH_EMULATOR_HOST=host.docker.internal:9099
         - FIREBASE_STORAGE_EMULATOR_HOST=host.docker.internal:9199
     ports: 
-      - 3000:3000 #_NextJS
+      - 3000:3000 
     depends_on:
       db:
         condition: service_healthy
@@ -94,13 +95,14 @@ services:
     image: grafana/loki:latest
     container_name: honji-loki
     restart: unless-stopped
-    user: "0" 
+    user: "0"
+    ports:
+      - "3100:3100"
     volumes:
-      - ./loki-config.yml:/etc/loki/local-config.yml
-      - loki_data:/loki
+      - ./loki-config.yml:/etc/loki/local-config.yml:ro
+    command: -config.file=/etc/loki/local-config.yml
     networks:
       - honji-network
-    command: -config.file=/etc/loki/local-config.yml
     
   promtail:
     depends_on:
@@ -141,5 +143,4 @@ volumes:
   postgres_data:
   redis_data:
   prometheus_data:
-  loki_data:
   grafana_data:

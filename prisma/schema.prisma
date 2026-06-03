@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  //output   = "../generated/prisma"
+//  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -18,44 +18,147 @@ enum Genre {
   FANTASY
   SCIENCE
   ART
+  COMPUTER_SCIENCE
+  LITERATURE
+  HISTORY
+  GEOGRAPHY
 }
 
-model book {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
+enum BorrowStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+  CANCELLED
+}
+
+model Book {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
   publisher String?
-  writer    String?
+  writerId  Int?
+  writer    Writer? @relation(fields: [writerId], references: [id])
   genre     Genre[]
+
+  description String? @db.Text
+  coverUrl    String?
+  pdfUrl      String?
+  isAvailable Boolean @default(true)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+
+  borrows   Borrow[]
+  favorites Favorite[]
+  reviews   Review[]
+
+  @@index([name])
+  @@index([writerId])
+  @@index([genre])
+  @@index([deletedAt])
 }
 
-model writer {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  Fname     String
-  Lname     String
-  age       Int
-  gender    String
-  genre     Genre[]
-  
+model Writer {
+  id     Int     @id @default(autoincrement())
+  email  String  @unique
+  Fname  String
+  Lname  String
+  age    Int
+  gender String
+  genre  Genre[]
+
+  books Book[]
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+
+  @@index([email])
+  @@index([deletedAt])
 }
 
-model reader {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  Fname    String
-  Lname    String
-  age      Int
-  gender   String
-  genre     Genre[]
+model Reader {
+  id     Int     @id @default(autoincrement())
+  email  String  @unique
+  Fname  String
+  Lname  String
+  age    Int
+  gender String
+  genre  Genre[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+
+  borrows   Borrow[]
+  favorites Favorite[]
+  reviews   Review[]
+
+  @@index([email])
+  @@index([deletedAt])
+}
+
+model Borrow {
+  id         Int          @id @default(autoincrement())
+  bookId     Int
+  userId     Int // Student ID
+  dueDate    DateTime
+  returnedAt DateTime?
+  status     BorrowStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  reader Reader @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([bookId])
+  @@index([userId])
+  @@index([dueDate])
+  @@index([status])
+}
+
+model Favorite {
+  id     Int @id @default(autoincrement())
+  userId Int
+  bookId Int
+
+  createdAt DateTime @default(now())
+
+  reader Reader @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@index([userId])
+  @@index([bookId])
+}
+
+model Review {
+  id      Int     @id @default(autoincrement())
+  bookId  Int
+  userId  Int
+  rating  Int     @default(5)
+  comment String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  reader Reader @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([bookId])
+  @@index([userId])
+}
+
+model UserActivity {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  action   String
+  targetId Int?
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
 }

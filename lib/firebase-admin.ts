@@ -1,3 +1,5 @@
+
+// /lib/firebase-admin.config.ts
 import admin from 'firebase-admin';
 import type { Auth } from 'firebase-admin/auth';
 
@@ -13,28 +15,30 @@ import {
   Fbase_client_x509_cert_url, 
   Fbase_universe_domain
 
-}  from "@/config/env";
+}  from "@/lib/auth/env";
 
 
 
 
 let firebaseApp;
 
-if (process.env.NODE_ENV === 'development') {
-  process.env.FIREBASE_AUTH_EMULATOR_HOST = 'firebase:9099';
-  process.env.FIREBASE_STORAGE_EMULATOR_HOST = 'firebase:9199';
+if(!admin.apps.length){
+  if (process.env.NODE_ENV === 'development') {
+  process.env.FIREBASE_AUTH_EMULATOR_HOST = 'host.docker.internal:9099';
+  process.env.FIREBASE_STORAGE_EMULATOR_HOST = 'host.docker.internal:9199';
   process.env.GCLOUD_PROJECT = Fbase_project_id || 'demo-project';
 
   firebaseApp = admin.initializeApp({
     projectId: Fbase_project_id || 'demo-project',
     storageBucket: `${Fbase_project_id || 'demo-project'}.appspot.com`,
   });
-} else {
+} else if (Fbase_public_key){
   const serviceAccount = {
   type: 'service_account',
   project_id: Fbase_project_id,
-  private_key_id: Fbase_private_key_id,
-  private_key: Fbase_private_key_id?.replace(/\\n/g, '\n'),  
+   private_key_id: Fbase_private_key_id,
+  private_key: Fbase_public_key?.replace(/\\n/g, '\n'),
+  //public_key: Fbase_public_key, 
   client_email: Fbase_client_email,
   client_id: Fbase_client_id,
   auth_uri: Fbase_auth_uri,
@@ -49,9 +53,12 @@ if (process.env.NODE_ENV === 'development') {
     storageBucket: `${Fbase_project_id}.appspot.com`,
   });
 }
+}else{
+  firebaseApp = admin.apps[0];
+}
 
-export const auth: Auth = admin.auth();
-export const storage = admin.storage().bucket();
+export const firebaseAuth: Auth = admin.apps.length ? admin.auth() : null as any;
+export const firebaseStorage = admin.apps.length ? admin.storage().bucket() : null as any;
 
 
 
